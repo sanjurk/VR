@@ -1,0 +1,951 @@
+<!DOCTYPE html><html><head><title>HatchXR</title><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,600i" rel="stylesheet"><meta property="og:title" content="Maze" />
+<meta property="og:description" content="Full of obstacles and dead-ends. And a happy surprise at the end." />
+<meta name="image" content="https://hatchxr.s3.amazonaws.com/5df37416498ce317589231ec/5dfa001f3487fc204aa6337e/thumbnails/300X300.png_1576670651587"/>
+<meta property="og:image" content="https://hatchxr.s3.amazonaws.com/5df37416498ce317589231ec/5dfa001f3487fc204aa6337e/thumbnails/300X300.png_1576670651587"/>
+<meta property="og:image:type" content="image/png"/>
+<meta property="og:image:width" content="150"/>
+<meta property="og:image:height" content="150"/><meta name="apple-mobile-web-app-capable" content="yes"><link href="https://fonts.googleapis.com/css?family=Montserrat&amp;display=swap" rel="stylesheet"><script>window.disableJoystick = !JSON.parse(`false`);
+CURRENT_CODE_VERSION = 0;
+CODE_VERSION = 0;</script>
+
+<style>* {
+  margin: 0px;
+  padding: 0px;
+}
+
+@media only screen and (max-width: 768px) {
+  * {
+    touch-action: manipulation;
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer */
+    -khtml-user-select: none; /* KHTML browsers (e.g. Konqueror) */
+    -webkit-user-select: none; /* Chrome, Safari, and Opera */
+    -webkit-touch-callout: none; /* Disable Android and iOS callouts*/
+  }
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  font-family: "Montserrat", sans-serif;
+  font-size: calc(12px + (16 - 12) * ((100vw - 300px) / (1600 - 300)));
+}
+
+.strong {
+  font-weight: bold;
+}
+
+#loader,
+#sceneIframe {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  display: flex;
+}
+
+#loader {
+  z-index: 99999;
+}
+
+#sceneIframe {
+  border: 0px;
+}
+
+#sceneIframe body {
+  z-index: 0;
+  margin: 0px;
+  padding: 0px;
+}
+
+#loader {
+  background-image: linear-gradient(to bottom, #161926, #0d0f1e);
+  flex-direction: column;
+}
+
+#loadingProgress {
+  position: relative;
+  text-align: center;
+  height: 10px;
+  width: 600px;
+  align-self: center;
+  margin-bottom: 50px;
+}
+
+@media (max-width: 900px) {
+  #loadingProgress {
+    width: 300px;
+  }
+}
+
+#back {
+  background: #fff;
+  opacity: 0.07;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+
+#progressStatus {
+  position: absolute;
+  height: 100%;
+  width: 0%;
+  background: #3ad887;
+  transition: 1s width ease;
+}
+
+#loader #loadingText {
+  opacity: 0.8;
+  font-size: 20px;
+  text-align: center;
+  color: #ffffff;
+}
+
+#loader #animationWrapper {
+  padding-top: 10vh;
+  display: flex;
+  justify-content: center;
+  height: 50%;
+}
+
+#loader #animationWrapper svg {
+  height: 30vh !important;
+}
+
+.modal {
+  /* display: none; */
+  position: fixed;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+#qrContainer {
+  display: none;
+}
+
+.qr-modal {
+  opacity: 0.95;
+  box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.2), 0 3px 20px 0 rgba(0, 0, 0, 0.2);
+  background-image: linear-gradient(to bottom, #161926, #0d0f1e);
+  padding: 40px;
+  color: #fff;
+  font-size: 20px;
+  border-radius: 5px;
+}
+
+.qr-modal-header .top-text {
+  text-align: center;
+  font-weight: bold;
+  letter-spacing: 0.2px;
+}
+
+.qr-modal-header .sub-text {
+  text-align: center;
+  font-weight: 300;
+  letter-spacing: 0.2px;
+}
+.qr-modal-content {
+  text-align: center;
+  margin-top: 40px;
+}
+#qrCode {
+  height: 200px !important;
+  width: 200px !important;
+}
+.modal.is-open {
+  /* display: block; */
+}
+
+#qrContainer {
+  z-index: 2;
+}
+
+.enable-sensor-safari {
+  height: 100%;
+  display: none;
+  flex-direction: column;
+  padding-top: 5vh;
+  padding-left: 5vw;
+  color: black;
+}
+
+.enable-sensor-safari .title {
+  font-weight: bold;
+  font-size: 30px;
+}
+
+.enable-sensor-safari .steps {
+  display: flex;
+  flex-direction: column;
+  margin-top: 7vh;
+  font-size: 25px;
+}
+
+.enable-sensor-safari .steps .step {
+  display: flex;
+  margin-top: 20px;
+}
+
+.enable-sensor-safari .steps .step .number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgb(218, 209, 227);
+  text-align: center;
+  font-size: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+}
+
+.enable-sensor-safari .steps .step .text {
+  margin-left: 20px;
+  width: calc(100% - 40px);
+}
+
+.place-holder-image {
+  width: 20px;
+  margin-left: 3px;
+  margin-right: 7px;
+}
+
+.highlight {
+  color: rgb(117, 32, 180);
+  font-weight: bold;
+}
+
+.permission-modal {
+  padding: 15px;
+  border-color: transparent;
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  z-index: 150;
+  color: #fff;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  text-align: center;
+  font-family: "Montserrat", sans-serif;
+  display: none;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.permission-modal p {
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.permission-modal div {
+  display: flex;
+  justify-content: center;
+}
+
+.permission-modal button {
+  padding: 10px;
+  width: 100px;
+  outline: none;
+  box-shadow: none;
+  border-radius: 3px;
+  font-family: "Montserrat", sans-serif;
+  margin-right: 1rem;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.button-no {
+  background-color: transparent;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.button-no:hover {
+  background-color: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.button-yes {
+  background-color: rgb(16, 99, 245);
+  border-color: rgb(68, 125, 254);
+}
+
+.button-yes:hover {
+  background-color: rgb(52, 110, 241);
+}
+
+.jump-controls {
+  right: 20px;
+  left: unset !important;
+}
+.jump-button {
+  color: rgb(255, 255, 255);
+  width: 80px;
+  height: 80px;
+  cursor: pointer;
+  position: relative;
+  font-weight: 600;
+  font-size: 14px;
+  touch-action: none;
+  background: rgb(26, 31, 37);
+  border-radius: 100%;
+  border-width: 4px;
+  border-style: solid;
+  border-color: rgb(17, 19, 23);
+  border-image: initial;
+  outline: none;
+}
+
+.controls-wrapper {
+  display: flex;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  pointer-events: all;
+  z-index: 1;
+}
+.controls-wrapper button {
+  cursor: pointer;
+  padding: 7px 5px;
+  transition: all 0.2s ease-in-out 0s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.move-controls {
+  display: grid;
+  grid-template-columns: 48px 48px 48px;
+  gap: 4px;
+  border-radius: 3px;
+}
+.play-button {
+  width: 48px;
+  height: 48px;
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  background: rgba(22, 25, 28, 0.8);
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-color: transparent;
+  outline: none;
+  transform: rotate(0deg);
+}
+
+.play-button-hover path {
+  fill: #ffffff;
+}
+.play-button-hover.path {
+  fill: #ffffff;
+}
+
+.rotate-270 {
+  transform: rotate(270deg);
+}
+.rotate-180 {
+  transform: rotate(180deg);
+}
+.rotate-90 {
+  transform: rotate(90deg);
+}
+.disable-dbl-tap-zoom {
+  touch-action: manipulation;
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer */
+  -khtml-user-select: none; /* KHTML browsers (e.g. Konqueror) */
+  -webkit-user-select: none; /* Chrome, Safari, and Opera */
+  -webkit-touch-callout: none; /* Disable Android and iOS callouts*/
+}
+
+#joystick {
+  position: fixed;
+  bottom: 30px;
+}
+
+.base {
+  background: #1a1f25;
+  opacity: 0.7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 120px;
+  height: 120px;
+}
+
+.inner-circle {
+  position: absolute;
+  height: 100px;
+  width: 100px;
+  border-radius: 100%;
+  border: 1px solid #1a1f25;
+  top: 10px;
+  left: 10px;
+  z-index: -1;
+}
+.stick {
+  position: absolute;
+  background: #1a1f25;
+  width: 50px;
+  height: 50px;
+  top: 35px;
+  left: 35px;
+  z-index: -1;
+}
+
+.up-icon,
+.right-icon,
+.down-icon,
+.left-icon {
+  position: absolute;
+  color: #fff;
+}
+.up-icon {
+  top: 0px;
+  left: 55px;
+}
+
+.right-icon {
+  top: 50px;
+  right: 0px;
+}
+
+.down-icon {
+  bottom: 0px;
+  left: 55px;
+}
+
+.left-icon {
+  top: 50px;
+  left: 0px;
+}
+
+.play-for-kids:hover {
+  border-color: #24ff00 !important;
+  background: none !important;
+}
+
+.play-for-kids:hover svg g#play_1 > path {
+  fill: #1ed300ba !important;
+}
+
+.play-for-kids:focus,
+.jump-button:focus {
+  outline: none;
+}
+
+.play-for-kids svg:focus {
+  outline: none !important;
+}
+</style>
+</head>
+<body onload='onScriptsLoaded()'><div id="loader"><div id="animationWrapper"><svg xmlns="http://www.w3.org/2000/svg" width="229" height="57" viewbox="0 0 229 57"><g fill="none" fill-rule="evenodd" opacity=".896"><path fill="#FFF" d="M70.947 42.875V14.277c0-.907.735-1.685 1.642-1.685.95 0 1.685.778 1.685 1.685v11.62c1.468-2.419 3.801-4.363 7.646-4.363 5.4 0 8.554 3.63 8.554 8.943v12.398c0 .95-.735 1.685-1.642 1.685a1.66 1.66 0 0 1-1.685-1.685V31.298c0-4.148-2.246-6.74-6.177-6.74-3.845 0-6.696 2.808-6.696 6.999v11.318c0 .95-.692 1.685-1.642 1.685a1.66 1.66 0 0 1-1.685-1.685zm33.264 1.944c-4.147 0-8.337-2.376-8.337-6.955v-.086c0-4.71 3.888-7.215 9.547-7.215 2.851 0 4.881.389 6.869.95v-.777c0-4.018-2.463-6.091-6.653-6.091-2.247 0-4.147.518-5.789 1.253-.216.086-.432.13-.605.13-.777 0-1.469-.649-1.469-1.426 0-.692.476-1.21.908-1.383 2.203-.95 4.45-1.512 7.3-1.512 3.154 0 5.573.821 7.215 2.463 1.512 1.512 2.29 3.672 2.29 6.523v12.225c0 .95-.692 1.642-1.599 1.642-.95 0-1.598-.691-1.598-1.555v-2.03c-1.556 2.03-4.148 3.844-8.079 3.844zm.648-2.635c4.104 0 7.474-2.506 7.474-6.048v-2.16a23.297 23.297 0 0 0-6.567-.95c-4.19 0-6.523 1.814-6.523 4.622v.086c0 2.808 2.592 4.45 5.616 4.45zm24.97 2.549c-3.586 0-6.307-1.771-6.307-6.307V24.947h-1.815c-.777 0-1.469-.691-1.469-1.469 0-.82.692-1.468 1.47-1.468h1.814v-5.27c0-.908.69-1.686 1.641-1.686.907 0 1.685.778 1.685 1.685v5.27h5.789c.82 0 1.512.692 1.512 1.47 0 .82-.691 1.468-1.512 1.468h-5.789v13.047c0 2.721 1.512 3.715 3.758 3.715 1.167 0 1.772-.303 2.03-.303.778 0 1.426.648 1.426 1.426 0 .605-.388 1.08-.95 1.296-.95.389-1.987.605-3.283.605zm19.397.13c-6.524 0-11.448-5.314-11.448-11.578v-.087c0-6.307 4.924-11.664 11.448-11.664 3.715 0 6.22 1.426 8.208 3.24.259.216.518.648.518 1.167 0 .907-.734 1.598-1.598 1.598-.432 0-.821-.173-1.08-.389-1.599-1.468-3.413-2.678-6.092-2.678-4.536 0-7.992 3.845-7.992 8.64v.086c0 4.839 3.543 8.684 8.208 8.684 2.55 0 4.58-1.167 6.221-2.722.216-.216.519-.432.95-.432.821 0 1.513.734 1.513 1.512 0 .389-.173.778-.432 1.037-2.117 2.117-4.666 3.585-8.424 3.585zm14.601-1.988V14.277c0-.907.735-1.685 1.642-1.685.95 0 1.685.778 1.685 1.685v11.62c1.468-2.419 3.801-4.363 7.646-4.363 5.4 0 8.554 3.63 8.554 8.943v12.398c0 .95-.735 1.685-1.642 1.685a1.66 1.66 0 0 1-1.685-1.685V31.298c0-4.148-2.246-6.74-6.177-6.74-3.845 0-6.696 2.808-6.696 6.999v11.318c0 .95-.692 1.685-1.642 1.685a1.66 1.66 0 0 1-1.685-1.685zm24.624-1.037c0-.907.346-1.598.907-2.246l5.919-6.998-5.4-6.221c-.735-.864-1.08-1.642-1.08-2.506 0-1.857 1.382-3.024 3.024-3.024 1.296 0 2.203.605 3.067 1.685l4.277 5.702 4.363-5.702c.778-.95 1.685-1.685 2.851-1.685 1.728 0 3.067 1.21 3.067 2.851 0 .908-.388 1.599-.907 2.247l-5.616 6.566 5.789 6.653c.734.864 1.08 1.642 1.08 2.506 0 1.857-1.382 3.024-3.024 3.024-1.296 0-2.203-.605-3.067-1.685l-4.666-6.135-4.665 6.135c-.778.95-1.685 1.685-2.852 1.685-1.728 0-3.067-1.21-3.067-2.852zm26.007-.518V24.213a3.282 3.282 0 0 1 3.283-3.283 3.282 3.282 0 0 1 3.283 3.283v1.037c.95-2.247 2.506-4.32 4.45-4.32 2.03 0 3.196 1.339 3.196 3.196 0 1.728-1.123 2.765-2.462 3.068-3.326.777-5.184 3.326-5.184 7.992v6.134a3.282 3.282 0 0 1-3.283 3.283 3.282 3.282 0 0 1-3.283-3.283z"></path><path stroke="#FFF" stroke-width="2.592" d="M45.096 32.16c0 12.48-8.985 22.597-20.069 22.597S4.957 44.641 4.957 32.161s8.986-30.107 20.07-30.107 20.069 17.627 20.069 30.107z"></path><path fill="#3AD887" d="M46.065 36.08s-13.813 2.152-17.67 0c-1.14-.635-2.315-3.754-3.62-3.756-1.31-.004-2.507 3.121-3.652 3.757-3.79 2.104-17.344 0-17.344 0a1.615 1.615 0 0 1-1.616-1.615V23.594c0-.891.723-1.614 1.616-1.614h42.286c.893 0 1.617.723 1.617 1.614v10.872c0 .892-.724 1.615-1.617 1.615z"></path><path stroke="#FFF" stroke-linecap="round" stroke-width="2.592" d="M47.682 34.466c0 .892-.724 1.615-1.617 1.615 0 0-13.813 2.151-17.67 0-1.14-.636-2.315-3.755-3.62-3.757-1.31-.004-2.507 3.121-3.652 3.757-3.79 2.104-17.344 0-17.344 0a1.615 1.615 0 0 1-1.616-1.615V23.594c0-.891.723-1.614 1.616-1.614h42.286c.893 0 1.617.723 1.617 1.614v10.872z"></path><path stroke="#FFF" stroke-linecap="round" stroke-width="1.728" d="M29.623 3.036l-.493 1.092.51 1.89s1.404.715.29 1.362l-.701 1.804s-.207.712.605.88c.811.17 1.459 1.284 1.024 2.172-.434.888 1.106 2.503 1.72 2.747M29.022 4.803s-2.673.239-1.736 1.877c.936 1.639-1.282 2.363-2.766 2.99"></path></g></svg></div><div id="loadingProgress"><div id="back"></div><div id="progressStatus"></div></div><span id="loadingText"></span></div><div><script src="https://hatchxr.com/aframe.min.js"></script><script src="https://hatchxr.com/aframe-environment-component.min.js"></script><script src="https://hatchxr.com/hatch-helper-functions@1.5.0.min.js"></script><script src="https://hatchxr.com/aframe-physics-system.min.js"></script><script src="https://hatchxr.com/aframe-aabb-collider-component.min.js"></script><script src="https://hatchxr.com/dependencies/aframe-extras.min.js"></script><script src="https://hatchxr.com/dependencies/aframe-effects.js"></script><script src="https://hatchxr.com/aframe-supercraft-loader.min.js"></script></div><div class="enable-sensor-safari" id="enable_sensor_safari"><div class="title">Let&apos;s enable your motion sensors</div><div class="steps"><div class="step"><div class="number">1</div><div class="text">Open<img class="icon place-holder-image" src="https://cdn.osxdaily.com/wp-content/uploads/2015/09/iOS-Settings-icon.png">Settings</div></div><div class="step"><div class="number">2</div><div class="text">Select <img class="place-holder-image" id="safari_svg">Safari</div></div><div class="step"><div class="number">3</div><div class="text">Enable<span class="highlight">Motion &amp; Orientation Access</span></div></div><div class="step"><div class="number">4</div><div class="text">Reload the page<img class="place-holder-image" id="reload_svg"></div></div></div></div><div class="modal" id="qrContainer" style="display: none;"><div class="qr-modal" id="qr-modal"><div class="qr-modal-header"><div class="top-text">Scan QR code</div><div class="sub-text">to run VR experience on your phone / tablet.</div></div><div class="qr-modal-content"><img id="qrCode"></div></div></div><div id="sceneIframe" allow="autoplay; fullscreen" style="background-image: linear-gradient(to bottom, #161926, #0d0f1e);"></div><a-scene inspector='url: https://hatchxr.com/aframe-inspector.min.js' hatch-type-scene='' id='SANJEEV' displayname='scene' renderer='' hatch-entity-store='background, fog, scene-options, anti-aliasing' hatch-disable-components='' effects='' bloom='' fxaa='true' godrays='' film='' hatch-effects-wrapper='' background='color: #0D101C; disabledByHatch: false' scenepaused='false' antialias='true' physics='debug:false' keyboard-shortcuts='' screenshot='width: 4096; height: 2048' vr-mode-ui='' anti-aliasing='enabled: true'><a-assets id='Assets'><a-asset-item id='GLTF2ASSETwjW6JZAEz' src='https://hatchxr.s3.amazonaws.com/hatch+camera.gltf'></a-asset-item><a-asset-item id='soundModel' src='https://hatchxr.s3.amazonaws.com/speaker.gltf'></a-asset-item><a-asset-item id='lightModel' src='https://hatchxr.s3.amazonaws.com/light.gltf'></a-asset-item><img src='https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture_green_moss.jpg' id='texture_green_moss' crossorigin='anonymous'><img src='https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg' id='texture9' crossorigin='anonymous'><img src='https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/crumble.png' id='crumble' crossorigin='anonymous'></a-assets><a-plane hatch-physics='type: none' shadow='cast: false; receive: true' hatch-type-shape='' id='Plane' displayname='Plane' data-icon-type='plane' position='4.24 0 -61.04547' rotation='-90 0 0' width='4' height='4' color='#fff' data-hatch-type='hatch-type-shape' data-hatch-category="{'design':'visible assets', 'code': 'basics' }" material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture_green_moss.jpg; repeat: 40 40; metalness: 0; emissive: #000000; roughness: 1; emissiveIntensity: 0; side: double' geometry='primitive: plane; width: 1; height: 1' physics-scale-fix='' scale='160 160 1' visible='true' class='' hatch-cursor-event-detection=''></a-plane><a-entity id='Player' displayname='Camera' position='0 150 0' data-is-droppable='false' data-not-clonable='true' rotation='0 0 0' movement-controls='enabled: false; speed: 0.5998800239952009; fly: true' hatch-type-player='playerMotion: Collide With Surfaces; gravity: 9; enableRotation: false' data-hatch-type='hatch-type-player' data-has-actions='false' data-is-draggable='false' data-is-deletable='false' data-icon-type='player' arcade-controls='enabled: true; jumpStartSpeed: 5; movementSpeed: 10; width: 1; height: 2; gravity: 9; halfHeight: 2; depth: 1; angularSpeed: 0.5; enableCollisionType: Top and Bottom; hillClimbingRotateTarget: Player; maxClimbAngleDegrees: 90; enableMultiJump: false; debugCollision: false; enableRotation: false; rotateWhileHillClimbing: true; debugHillClimbing: false; enableHillClimbing: false' gamepad-controls='' trackpad-controls='' keyboard-controls='' touch-controls='' scale='1 1 1' flight-controls='enabled: false'><a-cylinder id='Cylinder' hatch-type-shape='' geometry='primitive: cylinder; radius: 0.5; height: 2' data-hatch-type='hatch-type-shape' data-icon-type='cylinder' physics-scale-fix='' hatch-physics='' shadow='cast: false; receive: false' position='0 1 0' color='#6ecf88' material='color: #6ecf88; opacity: 0' rotation='0 0 0' scale='1 1 1' child-test='true' visible='true' class='clickable' hatch-cursor-event-detection='enableCursorDetection: true'></a-cylinder><a-camera position='0 1.6 0' rotation='0 0 0' look-controls='pointerLockEnabled: true' data-not-clonable='true' wasd-controls='enabled: false' id='Camera' data-hatch-type='hatch-type-camera' data-is-deletable='false' data-icon-type='camera' data-has-actions='false' hatch-type-camera='' camera='active: true' data-aframe-inspector-original-camera=''><a-cursor geometry='primitive: ring; radiusOuter: 0.03; radiusInner: 0.02; segmentsTheta: 32' data-not-clonable='true' cursor='fuse: false; fuseTimeout: 1000; rayOrigin: entity' position='20 0 -1' hatch-type-cursor='' id='Cursor' displayname='Cursor' data-hatch-type='hatch-type-cursor' data-icon-type='cursor' data-has-actions='false' data-is-draggable='false' data-is-deletable='false' material='color: #000; shader: flat; opacity: 0.8' raycaster='useWorldCoordinates: false; objects: .clickable; origin: 0 0 0; direction: 0 0 -1' visible='true'></a-cursor><a-entity dummymodel='' gltf-model='' data-not-visible='true' scale='' rotation='' data-not-selectable='true' visible='' auto-scalling-done='true'></a-entity></a-camera></a-entity><a-entity id='inspectorCameraShadowData' data-not-selectable='true' position='6.034058630148959 2.4895582481217904 -36.00559414690251' data-not-visible='true' rotation='-0.09462960610443874 -0.05226554132965924 -0.004958384851364388' center='6.793760187028967 1.11738 -50.46280277143362'></a-entity><a-box id='Box' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-2.97 1.5 -6.96' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1.8 1' rotation='0 90 0' scale='1.8 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box2' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='3 1.5 -21.2219' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 4.54 1' rotation='0 90 0' scale='4.54 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box32' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='8.8081 1.5 -26.91665' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3.42 1' rotation='0 90 0' scale='3.42 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box3' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-29.93 1.5 1.92795' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 5.4 1' rotation='0 0 0' scale='5.4 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box54' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='33.62 1.5 1.3696' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 6.13 1' rotation='0 0 0' scale='6.13 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box7' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-57.02 1.5 -59.11183' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 12 1' rotation='0 90 0' scale='12.22 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box14' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='3.65216 1.5 -120.38452' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 12.15 1' rotation='0 0 0' scale='12.15 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box53' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='64.29 1.5 -59.45' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 12 1' rotation='0 90 0' scale='12.15 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box8' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-51.05 1.5 -58.9114' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 11 1' rotation='0 90 0' scale='11 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box22' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-45.09 1.5 -78.94456' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 5.5 1' rotation='0 90 0' scale='5.5 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box23' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-38.96977 1.5 -75.63841' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 4.85 1' rotation='0 90 0' scale='4.85 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box33' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-33.2 1.5 -72.08865' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 4.2 1' rotation='0 90 0' scale='4.2 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box34' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-27.16143 1.5 -68.4' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3.5 1' rotation='0 90 0' scale='3.5 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box24' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-21.05 1.5 -99.82301' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3.6 1' rotation='0 0 0' scale='3.6 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box44' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-23.81 1.5 -106.39' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 4.25 1' rotation='0 0 0' scale='4.25 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box47' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='32.69343 1.5 -99.84' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3 1' rotation='0 0 0' scale='3 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box49' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='35.29744 1.5 -106.59' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3.6 1' rotation='0 0 0' scale='3.6 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box48' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='47.64 1.5 -89.88' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 2 1' rotation='0 90 0' scale='2 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box50' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='53.19 1.5 -96.49415' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 2 1' rotation='0 90 0' scale='2 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box51' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='58.64507 1.5 -100.05021' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 2.75 1' rotation='0 90 0' scale='2.75 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box45' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='3.67815 1.5 -113.88652' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 11 1' rotation='0 0 0' scale='11 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box40' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='4.4 1.5 -85.80407' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 6.3 1' rotation='0 0 0' scale='6.3 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box42' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='3.93 1.5 -93.07521' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 7.45 1' rotation='0 0 0' scale='7.45 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box9' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-45.04535 1.5 -24.91931' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3 1' rotation='0 90 0' scale='3 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box10' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-39.00706 1.5 -30.79' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3 1' rotation='0 90 0' scale='3 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box12' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-32.93929 1.5 -31.35607' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1.75 1' rotation='0 90 0' scale='1.75 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box15' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-27.2897 1.5 -37.17886' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1.75 1' rotation='0 90 0' scale='1.75 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box20' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-19.87169 1.5 -56.47271' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 4.6 1' rotation='0 90 0' scale='4.6 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box38' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='29.95 1.5 -56.47271' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 4.6 1' rotation='0 90 0' scale='4.6 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box57' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='53.23455 1.5 -40.65' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 6.2 1' rotation='0 90 0' scale='6.2 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box61' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='47.64 1.5 -43.68441' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 5.6 1' rotation='0 90 0' scale='5.6 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box37' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='5.04521 1.5 -79.43847' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 5 1' rotation='0 0 0' scale='5 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box58' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='30.97093 1.5 -9.76787' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 4.45 1' rotation='0 0 0' scale='4.45 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box62' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='31.30355 1.5 -15.56386' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3.3 1' rotation='0 0 0' scale='3.28 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box59' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='34.21239 1.5 -4.70607' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 5 1' rotation='0 0 0' scale='5 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box60' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='59.11729 1.5 -38.24238' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 6.7 1' rotation='0 90 0' scale='6.7 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box46' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='55.84662 1.5 -79.78389' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 5 1' rotation='0 0 0' scale='1.66 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box55' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='35.57905 1.5 -55.74538' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1.12 1' rotation='0 0 0' scale='1.12 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box27' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-7.47286 1.5 -55.69254' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 2.4 1' rotation='0 90 0' scale='2.4 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box28' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='5.87026 1.5 -67.70449' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 2.7 1' rotation='0 0 0' scale='2.7 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box26' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='5.67627 1.5 -73.49074' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3.8 1' rotation='0 0 0' scale='3.8 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box29' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='19.30922 1.5 -55.73117' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 2.4 1' rotation='0 90 0' scale='2.4 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box41' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='35.8389 1.5 -73.73173' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 2.4 1' rotation='0 90 0' scale='2.4 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box52' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='7.45 1.5 -103.51889' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 5 1' rotation='0 90 0' scale='2.07 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box43' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='41.24 1.5 -77.18538' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3.2 1' rotation='0 90 0' scale='3.2 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box56' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='41.14 1.5 -38.66338' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3.4 1' rotation='0 90 0' scale='3.4 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box66' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='35.39214 1.5 -38.66338' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 2.2 1' rotation='0 90 0' scale='2.2 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box35' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='24.6395 1.5 -56.04773' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3.52 1' rotation='0 90 0' scale='3.52 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box17' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-3.36 1.5 -33.44607' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1 1' rotation='0 90 0' scale='1 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box19' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-8.27659 1.5 -38.53334' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1 1' rotation='0 0 0' scale='1 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box30' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-2.25362 1.5 -43.85688' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1.06 1' rotation='0 0 0' scale='1.06 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box31' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='13.98906 1.5 -43.85688' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1.06 1' rotation='0 0 0' scale='1.06 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box36' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='16.74088 1.5 -38.40143' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1.6 1' rotation='0 0 0' scale='1.6 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box21' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-13.22 1.5 -45.60894' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1.4 1' rotation='0 90 0' scale='1.4 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box25' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-13.22 1.5 -66.52814' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1.4 1' rotation='0 90 0' scale='1.4 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box64' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='14.92676 1.5 -21.61018' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 2 1' rotation='0 90 0' scale='1.2 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box18' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-14.93517 1.5 -33.5' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1 1' rotation='0 0 0' scale='1 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box39' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='22.37649 1.5 -33.60012' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1.5 1' rotation='0 0 0' scale='1.5 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box65' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='25.06 1.5 -27.68488' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 2.05 1' rotation='0 0 0' scale='2.05 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box63' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='33.76 1.5 -21.72746' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 1.5 1' rotation='0 0 0' scale='1.5 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box13' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-36.18212 1.5 -45.94347' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 5 1' rotation='0 0 0' scale='1.8 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box4' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-30.03 1.5 -4' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 4.2 1' rotation='0 0 0' scale='4.22 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box5' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-27.07643 1.5 -10' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3.6 1' rotation='0 0 0' scale='3.6 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box6' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-20.97172 1.5 -15.88943' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3.62 1' rotation='0 0 0' scale='3.62 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box11' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-15 1.5 -22.6614' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 3.6 1' rotation='0 0 0' scale='3.6 1 1' class='' hatch-cursor-event-detection=''></a-box><a-box id='Box16' hatch-type-shape='' geometry='primitive: box; depth: 0.2; width: 10; height: 3' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='type: none' shadow='' position='-15.28562 1.5 -28.47234' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/texture9.jpg; repeat: 2.4 1' rotation='0 0 0' scale='2.4 1 1' class='' hatch-cursor-event-detection=''></a-box><a-entity id='GradientSky' material='shader: 2-color-gradient; topColor: #000000; middleColor: #071024; bottomColor: #2d2d2d; horizonOffset: 0.0; side: back' geometry='primitive: sphere; radius: 100' position='0 0 0' data-hatch-type='hatch-type-gradientSky' data-not-clonable='true' data-icon-type='gradient-sky' gradient-sky='' color='#d72b6d' scale='4 4 4'></a-entity><a-entity id='StarSystem' stars='radius: 120; depth: 1; size: 0.5; count: 2000' data-hatch-type='hatch-type-star-system' data-icon-type='stars' position='0 0 0' color='#65ba1e' visible='true' hatch-animations__1='animationLabel: animation-1; property: rotation; rotVec3Value: 0 360 0; infiniteRepeat: true; dur: 480'></a-entity><a-entity id='Light2' light='type: hemisphere; intensity: 0.4' data-hatch-type='hatch-type-light' data-icon-type='light-hemisphere' hatch-type-light='' data-is-expandable='false' data-is-droppable='false' position='0 33.69 2.59493' color='#659c42' rotation='0 0 0' scale='1 1 1' visible='true'><a-entity dummymodel='' gltf-model='' data-not-visible='true' scale='' data-not-selectable='true' visible='' auto-scalling-done='true'></a-entity></a-entity><a-entity id='Light' light='type: point; intensity: 1' data-hatch-type='hatch-type-light' data-icon-type='light-point' hatch-type-light='' data-is-expandable='false' data-is-droppable='false' position='6.5597 20.75279 -55.57894' color='#3547c3' rotation='0 0 0' scale='1 1 1' visible='true'><a-entity dummymodel='' gltf-model='' data-not-visible='true' scale='' data-not-selectable='true' visible='' auto-scalling-done='true'></a-entity></a-entity><a-entity id='Light3' light='type: spot; angle: 20; penumbra: 1; target: A_cool_little_cup_just_for_fun_' data-hatch-type='hatch-type-light' data-icon-type='light-spot' hatch-type-light='' data-is-expandable='false' data-is-droppable='false' position='14.51492 16.23497 -45.67199' color='#9df63d' rotation='-35.986333196576744 0 0' scale='1 1 1' visible='false'><a-entity dummymodel='' gltf-model='' data-not-visible='true' scale='' data-not-selectable='true' visible='' auto-scalling-done='true'></a-entity></a-entity><a-entity id='Spike1' gltfzip='file: https://static.hatchxr.com/sketchfab/26602c98bc424d079af7793edc4c0418' data-icon-type='https://media.sketchfab.com/urls/26602c98bc424d079af7793edc4c0418/dist/thumbnails/fbce0bfd1b9e465f9de9760e40f092da/510522cf447644438ea1067e12b6fbc1.jpeg' physics-scale-fix='' hatch-physics='type: none' hatch-animation-mixer='clip: spikeAction' data-hatch-type='hatch-type-sketchfab' position='-23.38 0.2973 -83.2' color='#f47475' auto-scalling-done='true' gltf-model='blob:https://hatchxr.com/f8e18f8e-7a6e-4d57-ab7e-3f4685d18ec1' rotation='0 90 180' scale='2.2 0.5 2.2' hatch-animations__1='animationLabel: animation-1; infiniteRepeat: true; dir: alternate; dur: 10; posVec3Value: -23.38 0.3 -83.2; fromPosVec3Value: -23.38 0.3 -30.59; startEvents: sceneload' visible='true'></a-entity><a-entity id='Spike4' gltfzip='file: https://static.hatchxr.com/sketchfab/26602c98bc424d079af7793edc4c0418' data-icon-type='https://media.sketchfab.com/urls/26602c98bc424d079af7793edc4c0418/dist/thumbnails/fbce0bfd1b9e465f9de9760e40f092da/510522cf447644438ea1067e12b6fbc1.jpeg' physics-scale-fix='' hatch-physics='type: none' hatch-animation-mixer='clip: spikeAction' data-hatch-type='hatch-type-sketchfab' position='-48.05 0.2973 -112.34' color='#f47475' auto-scalling-done='true' gltf-model='blob:https://hatchxr.com/35d7c71d-1512-4033-bc3f-c36e52fea5b9' rotation='0 90 180' scale='2.2 0.5 2.2' hatch-animations__1='animationLabel: animation-1; infiniteRepeat: true; dir: alternate; dur: 10; posVec3Value: -48.05 0.3 -5.53; fromPosVec3Value: -48.05 0.3 -112.34; startEvents: sceneload' visible='true'></a-entity><a-entity id='Spike2' gltfzip='file: https://static.hatchxr.com/sketchfab/26602c98bc424d079af7793edc4c0418' data-icon-type='https://media.sketchfab.com/urls/26602c98bc424d079af7793edc4c0418/dist/thumbnails/fbce0bfd1b9e465f9de9760e40f092da/510522cf447644438ea1067e12b6fbc1.jpeg' physics-scale-fix='' hatch-physics='type: none' hatch-animation-mixer='clip: spikeAction' data-hatch-type='hatch-type-sketchfab' position='5.94546 0.2973 -1.19' color='#f47475' auto-scalling-done='true' gltf-model='blob:https://hatchxr.com/a0a03322-3ed4-4d11-93ac-ebaac5e1ef1e' rotation='0 90 180' scale='2.2 0.5 2.2' hatch-animations__1='animationLabel: animation-1; infiniteRepeat: true; dir: alternate; dur: 10; posVec3Value: 5.95 0.3 -43.65; fromPosVec3Value: 5.95 0.3 -1.19; startEvents: sceneload' visible='true'></a-entity><a-entity id='Spike3' gltfzip='file: https://static.hatchxr.com/sketchfab/26602c98bc424d079af7793edc4c0418' data-icon-type='https://media.sketchfab.com/urls/26602c98bc424d079af7793edc4c0418/dist/thumbnails/fbce0bfd1b9e465f9de9760e40f092da/510522cf447644438ea1067e12b6fbc1.jpeg' physics-scale-fix='' hatch-physics='type: none' hatch-animation-mixer='clip: spikeAction' data-hatch-type='hatch-type-sketchfab' position='21.9885 0.2973 -39.84' color='#f47475' auto-scalling-done='true' gltf-model='blob:https://hatchxr.com/dd3f4fb4-2b7c-4e5f-a9d6-e55aff0b6640' rotation='0 90 180' scale='2 0.5 2' hatch-animations__1='animationLabel: animation-1; startEvents: sceneload; fromPosVec3Value: 21.99 0.3 -39.84; posVec3Value: 21.99 0.3 -71.97; infiniteRepeat: true; dur: 5' visible='true'></a-entity><a-box id='Door1' hatch-type-shape='' geometry='primitive: box; height: 3; width: 6.3; depth: 0.2' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='' shadow='' position='-0.23 1.24392 -31.71407' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/crumble.png; repeat: 6 3' rotation='0 0 0' scale='1 1 1' hatch-animations__1='animationLabel: animation-1; property: position; scaleVec3Value: 0 1 1; infiniteRepeat: true; startEvents: sceneload; posVec3Value: -3.38 1.24 -31.71; enabled: true' hatch-animations__2='animationLabel: animation-2; property: scale; scaleVec3Value: 0 1 1; infiniteRepeat: true; enabled: false' visible='true' class='' hatch-cursor-event-detection=''></a-box><a-box id='Door3' hatch-type-shape='' geometry='primitive: box; height: 3; width: 5.8; depth: 0.2' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='' shadow='' position='-36.05 1.24392 -82.4187' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/crumble.png; repeat: 6 3' rotation='0 0 0' scale='1 1 1' hatch-animations__1='animationLabel: animation-1; property: position; scaleVec3Value: 0 1 1; infiniteRepeat: true; startEvents: sceneload; posVec3Value: -38.95 1.24 -82.42; enabled: true; fromPosVec3Value: -36.05 1.24392 -82.42' hatch-animations__2='animationLabel: animation-2; property: scale; scaleVec3Value: 0 1 1; infiniteRepeat: true; enabled: true' visible='true' class='' hatch-cursor-event-detection=''></a-box><a-box id='Door2' hatch-type-shape='' geometry='primitive: box; height: 3; width: 6.3; depth: 0.2' data-hatch-type='hatch-type-shape' data-icon-type='box' physics-scale-fix='' hatch-physics='' shadow='' position='44.4 1.24392 -85.81315' color='#fff' material='color: #fff; src: https://api.hatchxr.com/api/proxy?url=https://static.hatchxr.com/global/assets/images/crumble.png; repeat: 6 3' rotation='0 0 0' scale='1 1 1' hatch-animations__1='animationLabel: animation-1; property: position; scaleVec3Value: 0 1 1; infiniteRepeat: true; startEvents: sceneload; posVec3Value: 41.25 1.24 -85.81; enabled: true' hatch-animations__2='animationLabel: animation-2; property: scale; scaleVec3Value: 0 1 1; infiniteRepeat: true; enabled: true; startEvents: sceneload' visible='true' class='' hatch-cursor-event-detection=''></a-box><a-entity id='Text3D' hatch-type-text-3d='value: You have found Nirvana!; height: 0.2; size: 1; font: https://s3.ap-south-1.amazonaws.com/hatchxr/fonts/Satisfy_Regular.json' data-hatch-type='hatch-type-text-3d' data-icon-type='3DText' physics-scale-fix='' hatch-physics='' shadow='cast: false; receive: false' material='color: #9a5e24; emissive: #fffc17; emissiveIntensity: 0.8' hatch-cursor-event-detection='enableCursorDetection: true' position='2.25544 1.9864 -55.05527' color='#e9b5c7' class='clickable' rotation='0 0 0' scale='0.6 0.6 0.6'></a-entity><a-entity id='aframeInspectorMouseCursor' raycaster='' cursor='' data-aframe-inspector='true' data-not-selectable='true'></a-entity><a-entity id='Lotus_man' gltfzip='file: https://static.hatchxr.com/sketchfab/718505d752e346fcbffd6222d7cf5173' data-icon-type='https://media.sketchfab.com/models/718505d752e346fcbffd6222d7cf5173/thumbnails/4640209613874f56aa25ef5c1c9b4450/e2416175a70d44d89a139342c94c7a30.jpeg' physics-scale-fix='' hatch-physics='type: none' shadow='receive: false' hatch-type-sketchfab='' data-hatch-type='hatch-type-sketchfab' hatch-cursor-event-detection='enableCursorDetection: false' position='5.79099 0.89276 -54.77262' color='#617c94' auto-scalling-done='true' gltf-model='blob:https://hatchxr.com/ff4189e4-4dff-4f72-89a8-0aef19424959' rotation='0 0 0' scale='1 1 1'></a-entity></a-scene>
+          <play-controls activeStepHOC=NaN></play-controls>
+          
+            <volume-controls st="kids" color-scheme="play" right="20px"></volume-controls>
+            </body>
+            
+            <script>var specifiedElement = document.getElementById('qr-modal');  document.addEventListener('touchmove', function (event) {
+  if (event.scale !== 1) { event.preventDefault(); }
+}, { passive: false });</script>
+
+<script>function changeLoadingText(text){
+  const LoadingTextElm = document.getElementById("loadingText");
+  LoadingTextElm.innerHTML = text;
+}
+
+function updateProgressStatus(status){
+  const progressStatusElm = document.getElementById("progressStatus");
+  progressStatusElm.style.width = `${status}%`;
+};
+
+//- loadHatchLogo();
+changeLoadingText(`Loading Project...`);
+updateProgressStatus(10);</script>
+
+<script>function onScriptsLoaded(){
+  console.log('on scripts loaded called')
+  if(document.querySelector('a-scene').hasAttribute('device-orientation-permission-ui')){
+    document.querySelector('a-scene').removeAttribute('device-orientation-permission-ui')
+  }
+  document.querySelector("a-scene").addEventListener('deviceorientationpermissiongranted',()=>{
+    console.log('device orientation granted')
+    // if device orientation is already granted then show sound permission
+    document.querySelector("a-scene").setAttribute('inject-sounds-permission','enabled', true)
+  })
+ 
+  const sceneEl = document.querySelector("a-scene");
+  const sounds = document.querySelectorAll("[sound]");
+
+  if (sounds.length > 0) {
+  sceneEl.setAttribute(
+    "inject-sounds-permission",
+    "enabled:true; isSoundAvailable:true"
+  );
+  }
+
+  updateProgressStatus(50);
+  changeLoadingText(
+    `Loading Project <span class="strong">${
+     `Maze` !== "" && `Maze` !== undefined
+        ? `Maze`
+        : `Maze`
+    }</span>...`
+  );
+  function loadHeader(){
+    const projectPath = window.location.pathname;
+
+    const headerEl = window.document.createElement("div");
+    headerEl.innerHTML = `
+<div class="top-header" id="header">
+    <a class="logo " href="https://github.com/sanjurk/" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="35" height="40" viewBox="0 0 35 40" class="hide-on-desktop">
+<g fill="none" fill-rule="evenodd" opacity=".8">
+<path stroke="#FFF" stroke-width="1.866" d="M32.029 22.716c0 8.985-6.469 16.27-14.45 16.27-7.98 0-14.45-7.285-14.45-16.27 0-8.986 6.47-21.677 14.45-21.677 7.981 0 14.45 12.691 14.45 21.677z"/>
+<path fill="#3AD887" d="M32.727 25.538s-9.945 1.55-12.723 0c-.82-.458-1.667-2.703-2.606-2.705-.944-.002-1.805 2.247-2.63 2.705-2.729 1.515-12.487 0-12.487 0-.643 0-1.164-.52-1.164-1.162v-7.828c0-.642.521-1.162 1.164-1.162h30.446c.643 0 1.164.52 1.164 1.162v7.828c0 .642-.521 1.162-1.164 1.162z"/>
+<path stroke="#FFF" stroke-linecap="round" stroke-width="1.866" d="M33.89 24.376c0 .642-.52 1.162-1.163 1.162 0 0-9.945 1.55-12.723 0-.82-.458-1.667-2.703-2.606-2.705-.944-.002-1.805 2.247-2.63 2.705-2.729 1.515-12.487 0-12.487 0-.643 0-1.164-.52-1.164-1.162v-7.828c0-.642.521-1.162 1.164-1.162h30.446c.643 0 1.164.52 1.164 1.162v7.828z"/>
+<path stroke="#FFF" stroke-linecap="round" stroke-width="1.244" d="M20.889 1.746l-.356.786.368 1.361s1.01.515.208.98l-.504 1.3s-.15.512.436.634c.584.121 1.05.923.737 1.563-.313.64.796 1.802 1.237 1.978M20.456 3.018s-1.925.172-1.25 1.352c.674 1.18-.923 1.701-1.992 2.153"/>
+</g>
+</svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="229" height="57" viewBox="0 0 229 57" class="hide-on-mob">
+<g fill="none" fill-rule="evenodd" opacity=".896">
+    <path fill="#FFF" d="M70.947 42.875V14.277c0-.907.735-1.685 1.642-1.685.95 0 1.685.778 1.685 1.685v11.62c1.468-2.419 3.801-4.363 7.646-4.363 5.4 0 8.554 3.63 8.554 8.943v12.398c0 .95-.735 1.685-1.642 1.685a1.66 1.66 0 0 1-1.685-1.685V31.298c0-4.148-2.246-6.74-6.177-6.74-3.845 0-6.696 2.808-6.696 6.999v11.318c0 .95-.692 1.685-1.642 1.685a1.66 1.66 0 0 1-1.685-1.685zm33.264 1.944c-4.147 0-8.337-2.376-8.337-6.955v-.086c0-4.71 3.888-7.215 9.547-7.215 2.851 0 4.881.389 6.869.95v-.777c0-4.018-2.463-6.091-6.653-6.091-2.247 0-4.147.518-5.789 1.253-.216.086-.432.13-.605.13-.777 0-1.469-.649-1.469-1.426 0-.692.476-1.21.908-1.383 2.203-.95 4.45-1.512 7.3-1.512 3.154 0 5.573.821 7.215 2.463 1.512 1.512 2.29 3.672 2.29 6.523v12.225c0 .95-.692 1.642-1.599 1.642-.95 0-1.598-.691-1.598-1.555v-2.03c-1.556 2.03-4.148 3.844-8.079 3.844zm.648-2.635c4.104 0 7.474-2.506 7.474-6.048v-2.16a23.297 23.297 0 0 0-6.567-.95c-4.19 0-6.523 1.814-6.523 4.622v.086c0 2.808 2.592 4.45 5.616 4.45zm24.97 2.549c-3.586 0-6.307-1.771-6.307-6.307V24.947h-1.815c-.777 0-1.469-.691-1.469-1.469 0-.82.692-1.468 1.47-1.468h1.814v-5.27c0-.908.69-1.686 1.641-1.686.907 0 1.685.778 1.685 1.685v5.27h5.789c.82 0 1.512.692 1.512 1.47 0 .82-.691 1.468-1.512 1.468h-5.789v13.047c0 2.721 1.512 3.715 3.758 3.715 1.167 0 1.772-.303 2.03-.303.778 0 1.426.648 1.426 1.426 0 .605-.388 1.08-.95 1.296-.95.389-1.987.605-3.283.605zm19.397.13c-6.524 0-11.448-5.314-11.448-11.578v-.087c0-6.307 4.924-11.664 11.448-11.664 3.715 0 6.22 1.426 8.208 3.24.259.216.518.648.518 1.167 0 .907-.734 1.598-1.598 1.598-.432 0-.821-.173-1.08-.389-1.599-1.468-3.413-2.678-6.092-2.678-4.536 0-7.992 3.845-7.992 8.64v.086c0 4.839 3.543 8.684 8.208 8.684 2.55 0 4.58-1.167 6.221-2.722.216-.216.519-.432.95-.432.821 0 1.513.734 1.513 1.512 0 .389-.173.778-.432 1.037-2.117 2.117-4.666 3.585-8.424 3.585zm14.601-1.988V14.277c0-.907.735-1.685 1.642-1.685.95 0 1.685.778 1.685 1.685v11.62c1.468-2.419 3.801-4.363 7.646-4.363 5.4 0 8.554 3.63 8.554 8.943v12.398c0 .95-.735 1.685-1.642 1.685a1.66 1.66 0 0 1-1.685-1.685V31.298c0-4.148-2.246-6.74-6.177-6.74-3.845 0-6.696 2.808-6.696 6.999v11.318c0 .95-.692 1.685-1.642 1.685a1.66 1.66 0 0 1-1.685-1.685zm24.624-1.037c0-.907.346-1.598.907-2.246l5.919-6.998-5.4-6.221c-.735-.864-1.08-1.642-1.08-2.506 0-1.857 1.382-3.024 3.024-3.024 1.296 0 2.203.605 3.067 1.685l4.277 5.702 4.363-5.702c.778-.95 1.685-1.685 2.851-1.685 1.728 0 3.067 1.21 3.067 2.851 0 .908-.388 1.599-.907 2.247l-5.616 6.566 5.789 6.653c.734.864 1.08 1.642 1.08 2.506 0 1.857-1.382 3.024-3.024 3.024-1.296 0-2.203-.605-3.067-1.685l-4.666-6.135-4.665 6.135c-.778.95-1.685 1.685-2.852 1.685-1.728 0-3.067-1.21-3.067-2.852zm26.007-.518V24.213a3.282 3.282 0 0 1 3.283-3.283 3.282 3.282 0 0 1 3.283 3.283v1.037c.95-2.247 2.506-4.32 4.45-4.32 2.03 0 3.196 1.339 3.196 3.196 0 1.728-1.123 2.765-2.462 3.068-3.326.777-5.184 3.326-5.184 7.992v6.134a3.282 3.282 0 0 1-3.283 3.283 3.282 3.282 0 0 1-3.283-3.283z"/>
+    <path stroke="#FFF" stroke-width="2.592" d="M45.096 32.16c0 12.48-8.985 22.597-20.069 22.597S4.957 44.641 4.957 32.161s8.986-30.107 20.07-30.107 20.069 17.627 20.069 30.107z"/>
+    <path fill="#3AD887" d="M46.065 36.08s-13.813 2.152-17.67 0c-1.14-.635-2.315-3.754-3.62-3.756-1.31-.004-2.507 3.121-3.652 3.757-3.79 2.104-17.344 0-17.344 0a1.615 1.615 0 0 1-1.616-1.615V23.594c0-.891.723-1.614 1.616-1.614h42.286c.893 0 1.617.723 1.617 1.614v10.872c0 .892-.724 1.615-1.617 1.615z"/>
+    <path stroke="#FFF" stroke-linecap="round" stroke-width="2.592" d="M47.682 34.466c0 .892-.724 1.615-1.617 1.615 0 0-13.813 2.151-17.67 0-1.14-.636-2.315-3.755-3.62-3.757-1.31-.004-2.507 3.121-3.652 3.757-3.79 2.104-17.344 0-17.344 0a1.615 1.615 0 0 1-1.616-1.615V23.594c0-.891.723-1.614 1.616-1.614h42.286c.893 0 1.617.723 1.617 1.614v10.872z"/>
+    <path stroke="#FFF" stroke-linecap="round" stroke-width="1.728" d="M29.623 3.036l-.493 1.092.51 1.89s1.404.715.29 1.362l-.701 1.804s-.207.712.605.88c.811.17 1.459 1.284 1.024 2.172-.434.888 1.106 2.503 1.72 2.747M29.022 4.803s-2.673.239-1.736 1.877c.936 1.639-1.282 2.363-2.766 2.99"/>
+</g>
+</svg>
+            <div class="hide-on-desktop vertical-align-middle">
+            <div class="in-logo-projectname">Maze</div>
+            <div class="in-logo-username">sanjurk</div>
+            </div>
+            <style>
+          .vertical-align-middle{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+          }
+      </style>
+          </a>
+          
+<div class="right-actions hide-on-mob">
+  
+      <style>
+
+      </style>
+      
+    
+  </div>
+  
+  <style>
+    body, html {
+      margin: 0px;
+      padding: 0px;
+      font-family: 'Montserrat', sans-serif;
+      color: #fff;
+    }
+    .top-header-mobile {
+      position: fixed;
+      top: 10px;
+      display: flex;
+      align-items: center;
+      width: 75%;
+      z-index:1;
+    }
+    .top-header{
+      position: fixed;
+      top: 10px;
+      display: flex;
+      width: 100%;
+      z-index:1;
+    }
+    .logo > svg {
+      width: 164px;
+      opacity: 0.8;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+    .logo > svg:hover {
+      opacity: 1;
+    }
+    .logo,
+    .logo-kids {
+      display: flex;
+      align-items: center;
+      margin-left: 20px;
+      text-decoration:none
+    }
+    .right-actions {
+      display: flex;
+      flex: 1;
+      justify-content: flex-end;
+      margin-right: 85px;
+      margin-top: 10px;
+    }
+    .right-actions > div {
+      margin-left: 20px;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      background-color: rgba(0,0,0,.35);
+      height: 41px;
+      border-radius: 2px;
+      padding: 8px 10px;
+      box-sizing: border-box;
+    }
+    .right-actions > div:hover {
+      background: #000;
+    }
+    .like span {
+      margin: 2px;
+    }
+    .right-actions > div > svg {
+      opacity: 0.8;
+      height: 30px;
+      width: 24px;
+    }
+    .right-actions > div > svg:hover {
+      opacity: 1;
+    }
+    .hidden {
+      display: none !important;
+    }
+
+    /* Tooltip text */
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 120px;
+      background-color: black;
+      color: #fff;
+      text-align: center;
+      padding: 5px 0;
+      border-radius: 6px; 
+      /* Position the tooltip text - see examples below! */
+      position: absolute;
+      z-index: 1;
+      right: 30px;
+      top: 40px;
+      box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.23);
+      color: #fff;
+      padding: 20px;
+    }
+
+    /* Show the tooltip text when you mouse over the tooltip container */
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+    }
+    .tooltip:focus .tooltiptext {
+      visibility: visible;
+    }
+    .tooltip:active .tooltiptext {
+      visibility: visible;
+    }
+    .project-detail {
+
+    }
+    .project-detail .projectname {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: normal;
+      color: #ffffff;
+    }
+    .project-detail .username {
+      font-size: 12px;
+      letter-spacing: normal;
+      color: #ffffff;
+    }
+    .project-detail .username a {
+      color: #fff;
+    }
+    .is-liked path {
+      fill: red;
+    }
+    .in-logo-projectname {
+      color: #fff;
+      opacity: 0.8;
+      letter-spacing: normal;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .in-logo-username {
+      color: #fff;
+      opacity: 0.8;
+      letter-spacing: normal;
+      font-size: 12px;
+      font-weight: normal;
+      letter-spacing: normal;
+    }
+    .play-for-kids {
+      background: transparent;
+      cursor: pointer;
+      position: fixed;
+      width: 85px;
+      height: 85px;
+      outline: none;
+      background-color: rgb(30, 211, 0);
+      cursor: pointer;
+      border-width: 4px;
+      border-style: solid;
+      border-color: rgba(17, 19, 23, 0.5);
+      border-image: initial;
+      border-radius: 50%;
+      bottom: 120px;
+      right: 20px;
+    }
+    .play-for-kids:focus {
+      outline: none;
+    }
+    .edit-wrapper {
+      display: inline-block;
+      position: absolute;
+      z-index: 9999;
+      top: 20px;
+      right: 80px;
+      background-color: rgba(0,0,0,.35);
+      padding: 11px 20px;
+      border-radius: 2px;
+      cursor: pointer;
+      text-decoration: none;
+      color: #fff;
+    }
+    .edit-wrapper:hover {
+      background-color: rgba(0,0,0,1);
+      color: #fff;
+    }
+    .edit-wrapper img {
+      width: 15px;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+
+    .jump-button {
+      display: hidden;
+    }
+
+    .hide-on-desktop {
+      display: none;
+    }
+
+    @media only screen and (max-width: 1024px) {
+      .hide-on-mob {
+        display: none;
+      }
+      .hide-on-desktop {
+        display: block;
+      }
+      .logo svg {
+        width: 40px;
+      }
+      
+      .logo-kids {
+        width: 60%;
+      }
+
+      .right-actions {
+        margin-right: 15px;
+      }
+      
+      .player-controler-wrapper {
+        bottom: 35px !important;
+      }
+
+      .play-for-kids{
+        bottom:85px;
+        width: 50px;
+        height: 50px;
+      }
+      .jump-button {
+        color: #fff;
+        font-size: 10px;
+        height: 50px;
+        width: 50px;
+      }
+    }
+    .hide {
+      display: none;
+    }
+  </style>
+</div>
+
+    <style>background-color:red</style>
+ 
+  
+`;
+    window.document.body.appendChild(headerEl);
+    const isCourse = 'false' === 'true' || 'false' === true;
+    const editEl = window.document.createElement("div");
+    editEl.innerHTML = `
+    <a class="edit-wrapper hide-on-mob " target="_blank" href=https://codepen.io/pen/>
+    <img src='https://hatchxr.s3.ap-south-1.amazonaws.com/hatch-viewer/edit.svg'>
+      Edit in CODEPEN
+    </a>
+  </style>
+  `;
+    if(!false){
+      window.document.body.appendChild(editEl);
+    }
+    /**
+      if it's a touch device change type of arrow-control to joystick
+    */
+    function is_touch_enabled() {
+      return ( 'ontouchstart' in window ) || 
+         ( navigator.maxTouchPoints > 0 ) || 
+         ( navigator.msMaxTouchPoints > 0 );
+    }
+    const isTouchDevice = is_touch_enabled();
+    //- const arrowControl = document.querySelector('arrow-control');
+    //- console.log({ isTouchDevice });
+    //- if (isTouchDevice) {
+    //-   arrowControl.setAttribute('controltype', 'joystick');
+    //- } else {
+    //-   arrowControl.setAttribute('controltype', 'arrow');
+    //- }
+  }
+  const elmList = [{ id: 'header', display: "flex" }];
+  function onEnterVR() {
+    //  hide all the dom elements
+    for (let i = 0; i < elmList.length; i++) {
+      const elm = document.getElementById(elmList[i].id);
+      elm.style.display = "none";
+    }
+
+  }
+  function onExitVR() {
+    //  get back all the dom elements
+    for (let i = 0; i < elmList.length; i++) {
+      const elm = document.getElementById(elmList[i].id);
+      elm.style.display = elmList[i].display;
+    }
+  }
+  function initialize(){
+    console.log('Scene Has Loaded')
+    const sceneEl = document.querySelector('a-scene');
+    //  add the listener for 
+    sceneEl.addEventListener('enter-vr', onEnterVR);
+    sceneEl.addEventListener('exit-vr', onExitVR);
+
+
+    setTimeout(() => {
+      console.log('Motion Sensor Block')
+      document.getElementById('loader').style.display = 'none';
+      //- if(false){
+      document.querySelector('a-scene').setAttribute('device-orientation-permission-ui','enabled',true)
+      //- }
+      loadHeader();
+      
+    },1000);
+
+    const scene = window.document.querySelector("a-scene");
+    window.HatchAudioEngine.soundList = [{"_id":"600744448bd071516bcf452a","asset":"Crowd","ext":".mp3","key":"5df37416498ce317589231ec/assets/sounds/Crowd_1611088963024.mp3","link":"https://static.hatchxr.com/5df37416498ce317589231ec/assets/sounds/Crowd_1611088963024.mp3"},{"_id":"60073d348bd071516bcf4523","asset":"Cheering","ext":".mp3","key":"5df37416498ce317589231ec/assets/sounds/Cheering_1611087155048.mp3","link":"https://static.hatchxr.com/5df37416498ce317589231ec/assets/sounds/Cheering_1611087155048.mp3"},{"_id":"5e64a42ab1da912c71bd1ab6","asset":"mother day song-2","ext":".mp3","key":"5df37416498ce317589231ec/assets/sounds/mother day song-2_1583653928610.mp3","link":"https://static.hatchxr.com/5df37416498ce317589231ec/assets/sounds/mother day song-2_1583653928610.mp3"},{"_id":"5e64a2ddb1da912c71bd1ab3","asset":"mother-day-song","ext":".mp3","key":"5df37416498ce317589231ec/assets/sounds/mother-day-song_1583653595897.mp3","link":"https://static.hatchxr.com/5df37416498ce317589231ec/assets/sounds/mother-day-song_1583653595897.mp3"},{"_id":"5dfdca2396cd50368402624a","asset":"harlemshake","ext":".mp3","key":"5df37416498ce317589231ec/assets/sounds/harlemshake_1576913440594.mp3","link":"https://static.hatchxr.com/5df37416498ce317589231ec/assets/sounds/harlemshake_1576913440594.mp3"},{"_id":"5f586094f05249549303541e","asset":"seal_scream","link":"https://static.hatchxr.com/global/assets/sounds/seal_scream.mp3","key":"global/assets/sounds/seal_scream.mp3","ext":".mp3"},{"_id":"5f586094f05249549303541d","asset":"running","link":"https://static.hatchxr.com/global/assets/sounds/running.mp3","key":"global/assets/sounds/running.mp3","ext":".mp3"},{"_id":"5f586094f05249549303541c","asset":"fire","link":"https://static.hatchxr.com/global/assets/sounds/fire.mp3","key":"global/assets/sounds/fire.mp3","ext":".mp3"},{"_id":"5f586094f05249549303541b","asset":"stag_roar","link":"https://static.hatchxr.com/global/assets/sounds/stag_roar.mp3","key":"global/assets/sounds/stag_roar.mp3","ext":".mp3"},{"_id":"5f586094f05249549303541a","asset":"dog_bark","link":"https://static.hatchxr.com/global/assets/sounds/dog_bark.mp3","key":"global/assets/sounds/dog_bark.mp3","ext":".mp3"},{"_id":"5f586094f052495493035419","asset":"owl_hoot","link":"https://static.hatchxr.com/global/assets/sounds/owl_hoot.mp3","key":"global/assets/sounds/owl_hoot.mp3","ext":".mp3"},{"_id":"5f586094f052495493035418","asset":"do_bark_2","link":"https://static.hatchxr.com/global/assets/sounds/do_bark_2.mp3","key":"global/assets/sounds/do_bark_2.mp3","ext":".mp3"},{"_id":"5f586094f052495493035417","asset":"rain","link":"https://static.hatchxr.com/global/assets/sounds/rain.mp3","key":"global/assets/sounds/rain.mp3","ext":".mp3"},{"_id":"5f586094f052495493035416","asset":"alpaca_scream","link":"https://static.hatchxr.com/global/assets/sounds/alpaca_scream.mp3","key":"global/assets/sounds/alpaca_scream.mp3","ext":".mp3"},{"_id":"5f586094f052495493035415","asset":"footsteps on gravel","link":"https://static.hatchxr.com/global/assets/sounds/footsteps on gravel.mp3","key":"global/assets/sounds/footsteps on gravel.mp3","ext":".mp3"},{"_id":"5f586094f052495493035414","asset":"horse_neigh","link":"https://static.hatchxr.com/global/assets/sounds/horse_neigh.mp3","key":"global/assets/sounds/horse_neigh.mp3","ext":".mp3"},{"_id":"5f586094f052495493035413","asset":"jingle_bells","link":"https://static.hatchxr.com/global/assets/sounds/jingle_bells.mp3","key":"global/assets/sounds/jingle_bells.mp3","ext":".mp3"},{"_id":"5f586094f052495493035412","asset":"camel","link":"https://static.hatchxr.com/global/assets/sounds/camel.mp3","key":"global/assets/sounds/camel.mp3","ext":".mp3"},{"_id":"5f586094f052495493035411","asset":"elephant_trumpet","link":"https://static.hatchxr.com/global/assets/sounds/elephant_trumpet.mp3","key":"global/assets/sounds/elephant_trumpet.mp3","ext":".mp3"},{"_id":"5f586094f052495493035410","asset":"rain_2","link":"https://static.hatchxr.com/global/assets/sounds/rain_2.mp3","key":"global/assets/sounds/rain_2.mp3","ext":".mp3"},{"_id":"5f586094f05249549303540f","asset":"duck_shout","link":"https://static.hatchxr.com/global/assets/sounds/duck_shout.mp3","key":"global/assets/sounds/duck_shout.mp3","ext":".mp3"},{"_id":"5f586094f05249549303540e","asset":"eagle_call","link":"https://static.hatchxr.com/global/assets/sounds/eagle_call.mp3","key":"global/assets/sounds/eagle_call.mp3","ext":".mp3"},{"_id":"5f586094f05249549303540d","asset":"baby_panda_cry","link":"https://static.hatchxr.com/global/assets/sounds/baby_panda_cry.mp3","key":"global/assets/sounds/baby_panda_cry.mp3","ext":".mp3"},{"_id":"5f586094f05249549303540c","asset":"star_wars_theme","link":"https://static.hatchxr.com/global/assets/sounds/star_wars_theme.mp3","key":"global/assets/sounds/star_wars_theme.mp3","ext":".mp3"},{"_id":"5f586094f05249549303540b","asset":"frog_croak","link":"https://static.hatchxr.com/global/assets/sounds/frog_croak.mp3","key":"global/assets/sounds/frog_croak.mp3","ext":".mp3"},{"_id":"5f586094f05249549303540a","asset":"harry_potter_theme","link":"https://static.hatchxr.com/global/assets/sounds/harry_potter_theme.mp3","key":"global/assets/sounds/harry_potter_theme.mp3","ext":".mp3"},{"_id":"5f586094f052495493035409","asset":"hyena_laugh","link":"https://static.hatchxr.com/global/assets/sounds/hyena_laugh.mp3","key":"global/assets/sounds/hyena_laugh.mp3","ext":".mp3"},{"_id":"5f586094f052495493035408","asset":"danger","link":"https://static.hatchxr.com/global/assets/sounds/danger.mp3","key":"global/assets/sounds/danger.mp3","ext":".mp3"},{"_id":"5f586094f052495493035407","asset":"chimpanzee","link":"https://static.hatchxr.com/global/assets/sounds/chimpanzee.mp3","key":"global/assets/sounds/chimpanzee.mp3","ext":".mp3"},{"_id":"5f586094f052495493035406","asset":"ambient_insects","link":"https://static.hatchxr.com/global/assets/sounds/ambient_insects.mp3","key":"global/assets/sounds/ambient_insects.mp3","ext":".mp3"},{"_id":"5f586094f052495493035405","asset":"ambient_city","link":"https://static.hatchxr.com/global/assets/sounds/ambient_city.mp3","key":"global/assets/sounds/ambient_city.mp3","ext":".mp3"},{"_id":"5f586094f052495493035404","asset":"lightning","link":"https://static.hatchxr.com/global/assets/sounds/lightning.mp3","key":"global/assets/sounds/lightning.mp3","ext":".mp3"},{"_id":"5f586094f052495493035403","asset":"notification_alert","link":"https://static.hatchxr.com/global/assets/sounds/notification_alert.mp3","key":"global/assets/sounds/notification_alert.mp3","ext":".mp3"},{"_id":"5f586094f052495493035402","asset":"cat_meow","link":"https://static.hatchxr.com/global/assets/sounds/cat_meow.mp3","key":"global/assets/sounds/cat_meow.mp3","ext":".mp3"},{"_id":"5f586094f052495493035401","asset":"tiger_roar","link":"https://static.hatchxr.com/global/assets/sounds/tiger_roar.mp3","key":"global/assets/sounds/tiger_roar.mp3","ext":".mp3"},{"_id":"5f586094f052495493035400","asset":"vulture_shriek","link":"https://static.hatchxr.com/global/assets/sounds/vulture_shriek.mp3","key":"global/assets/sounds/vulture_shriek.mp3","ext":".mp3"},{"_id":"5f586094f0524954930353ff","asset":"thunder","link":"https://static.hatchxr.com/global/assets/sounds/thunder.mp3","key":"global/assets/sounds/thunder.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c46862f","asset":"Fail_Trumpet","link":"https://static.hatchxr.com/global/assets/sounds/Fail_Trumpet.mp3","key":"global/assets/sounds/Fail_Trumpet.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c46862c","asset":"Background_Theme_Equinox","link":"https://static.hatchxr.com/global/assets/sounds/Background_Theme_Equinox.mp3","key":"global/assets/sounds/Background_Theme_Equinox.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c46862d","asset":"labrador-barking","link":"https://static.hatchxr.com/global/assets/sounds/labrador-barking.mp3","key":"global/assets/sounds/labrador-barking.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c46862e","asset":"birds","link":"https://static.hatchxr.com/global/assets/sounds/birds.mp3","key":"global/assets/sounds/birds.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c468629","asset":"Mysterious_Intro_Music","link":"https://static.hatchxr.com/global/assets/sounds/Mysterious_Intro_Music.mp3","key":"global/assets/sounds/Mysterious_Intro_Music.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c46862a","asset":"rockFall","link":"https://static.hatchxr.com/global/assets/sounds/rockFall.mp3","key":"global/assets/sounds/rockFall.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c46862b","asset":"game_over","link":"https://static.hatchxr.com/global/assets/sounds/game_over.mp3","key":"global/assets/sounds/game_over.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c468627","asset":"devil","link":"https://static.hatchxr.com/global/assets/sounds/devil.mp3","key":"global/assets/sounds/devil.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c468628","asset":"heavy-rain","link":"https://static.hatchxr.com/global/assets/sounds/heavy-rain.mp3","key":"global/assets/sounds/heavy-rain.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c468624","asset":"service-bell","link":"https://static.hatchxr.com/global/assets/sounds/service-bell.mp3","key":"global/assets/sounds/service-bell.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c468625","asset":"alien-spaceship","link":"https://static.hatchxr.com/global/assets/sounds/alien-spaceship.mp3","key":"global/assets/sounds/alien-spaceship.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c468626","asset":"Single_Gunshot","link":"https://static.hatchxr.com/global/assets/sounds/Single_Gunshot.mp3","key":"global/assets/sounds/Single_Gunshot.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c468622","asset":"right_answer","link":"https://static.hatchxr.com/global/assets/sounds/right_answer.mp3","key":"global/assets/sounds/right_answer.mp3","ext":".mp3"},{"_id":"5d6941f5df8c2d0d0c468623","asset":"Wood_Whack","link":"https://static.hatchxr.com/global/assets/sounds/Wood_Whack.mp3","key":"global/assets/sounds/Wood_Whack.mp3","ext":".mp3"}]
+    
+
+    runScripts();
+  }
+
+  if( document.querySelector('a-scene').hasLoaded){
+    initialize();
+  }else{
+    document.querySelector('a-scene').addEventListener('loaded', function() {
+    initialize();
+    });
+  }
+  
+
+  function runScripts() {
+    [{"_id":"5d78ea70e62e5d1e18d71d2d","selected":true,"level":0,"fileName":"index","createdAt":"2019-09-11T12:37:04.082Z","updatedAt":"2019-09-11T12:37:04.082Z","kidsCodeFileToParse":"","xmlValue":"","value":"\n/*\n    write your code here\n*/\nvar gameOver = false\n\nHatch.onKeyUp(function (event) {\n    if(event.key == 'p'){\n        if(!gameOver) return   \n        Hatch.play()\n        Player.setPosition(0, 2, 0)\n        gameOver = false\n    }\n});\n\nCylinder.detectCollisionsWith([Spike1, Spike2, Spike3, Spike4, Door1, Door2, Door3], function(collidedObject) {\n    if(gameOver) return\n\n    gameOver = true\n    Hatch.pause()\n});\n    \n\n\n"}].map((script, idx) => {
+      const scriptTag = window.document.createElement("script");
+      scriptTag.type = "text/javascript";
+      scriptTag.text = script.value;
+      scriptTag.id =  idx === 0 ? 'code' : 'code' + idx;
+      window.document.head.appendChild(scriptTag);
+    });
+    window.playForKids = function() {
+      let scriptElement = document.querySelector('script[id="code"]'); 
+      if (scriptElement) {
+        const event = new Event('green-btn-clicked'); 
+        scriptElement.dispatchEvent(event);
+      }
+      try {
+        if (window.onGreenPlayButtonClicked) window.onGreenPlayButtonClicked(); 
+      } catch(error) {
+        console.error(error);
+      }
+      this.blur();
+    }
+    /**
+      * from step 3 onwards appends script dont' show green play button
+    **/
+    const stepNo = '0';
+    hatchUtils.onPlayButtonClicked = window.onGreenPlayButtonClicked;
+    if (parseInt(stepNo) >= 3) {
+      window.onGreenPlayButtonClicked();
+    }
+    hatchUtils.onResetButtonClicked = function() {
+      location.reload(true);
+    };
+    hatchUtils.gameOverTryAgainCallback = function() {
+      location.reload(true);
+    };
+    window.stepCompleted = function() {
+      /**
+        Open Game Over Modal
+      **/
+      hatchUtils.openGameOverModal("Congratulations. You have completed the step.", false, "PLAY AGAIN");
+    };
+  }
+
+
+}</script><script>function injectHelpersToIframe(helpers){
+  Object.keys(helpers).forEach(key => {
+    window[key] = helpers[key];
+  });
+};
+injectHelpersToIframe({
+  hatchFunctions: {
+    toggleQR: function toggleQr(){
+      const qrCodeContainerEls = document.getElementById("qrContainer");
+      const containerDisplay = qrCodeContainerEls.style.display;
+      if (containerDisplay === "none" || containerDisplay === "") {
+        //  show the container
+        qrCodeContainerEls.style.display = "flex";
+      } else {
+        //  hide the container
+        qrCodeContainerEls.style.display = "none";
+      }
+    }
+  }
+});
+
+var myCanvas = document.getElementById('qrCode');
+myCanvasi.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIQAAACECAYAAABRRIOnAAAAAklEQVR4AewaftIAAARISURBVO3BMa4cSxLAQLIw978yV8Y30iqh0fO0EpAR9gtr/eew1nBYazisNRzWGg5rDYe1hsNaw4ffUPmTKp5QmSomlScqJpVvqphU/qSKm8Naw2Gt4bDW8OGhim9SeULlmyomlScqblSeqPgmlScOaw2HtYbDWsOHl1SeqHhCZaq4UbmpeKLiCZWp4g2VJyreOKw1HNYaDmsNH/5xKlPFpDKpvKEyVUwV/7LDWsNhreGw1vDhH6MyVTxR8YTKjcoTFX+zw1rDYa3hsNbw4aWKP6liUnlD5YmKP6niTzqsNRzWGg5rDR8eUvmbVUwqT1RMKjcqU8WkMlXcqPw/HdYaDmsNh7WGD79R8S9ReUPliYpJ5YmKv8lhreGw1nBYa/jwGypTxaTyTRVTxRsVNxVPqDxRcaPyTRVvHNYaDmsNh7WGD79R8U0VNypTxaTyhMpNxaTyk1RuKiaVqeIJlani5rDWcFhrOKw12C9cqNxUPKFyUzGpTBWTyk3FpPJNFW+oPFHxkw5rDYe1hsNag/3CD1K5qZhUpoonVJ6ouFGZKm5UpopJ5abiRmWqmFSmiicOaw2HtYbDWoP9woXKVHGj8pMqJpWpYlKZKiaVqeKbVKaKG5WpYlK5qXjjsNZwWGs4rDV8eEnliYo3VL6p4g2VJ1SeUJkqnlCZKm4Oaw2HtYbDWsOHh1SmijdUbiqeUHlDZap4ouJG5Q2Vm4qp4onDWsNhreGw1vDhoYoblaliUpkqblRuKm5UblSmij+p4kZlqrhRmSqeOKw1HNYaDmsNH36YylQxqfykipuKSeWJiknlpuKJiknlpuKNw1rDYa3hsNbw4csqblSmiidUJpWp4kblm1SeUHmjYlK5UZkqbg5rDYe1hsNaw4cvU3lCZap4ouInVdyoTBU3KlPFjcobFU8c1hoOaw2HtYYPL6lMFZPKTcWkMlXcqEwVT1RMKj+p4kZlqripmFSmiicOaw2HtYbDWoP9woXKVHGjMlVMKjcVk8pU8U0qU8WkclMxqfykiknliYqbw1rDYa3hsNZgv/AXU3miYlKZKm5UbiomlaliUpkqnlD5poqbw1rDYa3hsNbw4TdU/qSKqWJSmSpuKt6oeELlCZWp4o2KNw5rDYe1hsNaw4eHKr5J5UZlqrhRuamYVN6omFSeqHii4kblpuLmsNZwWGs4rDV8eEnliYo3VKaKqeKJiidUpoqpYlKZVL5JZap447DWcFhrOKw1fPjHVEwqU8UTKlPFpDJV3KjcVLyhcqNyU3FzWGs4rDUc1ho+/GNUnlB5QuWNiidUflLFE4e1hsNaw2Gt4cNLFT+pYlKZKiaVqWJSmSreUJkqJpWpYqq4UbmpmFTeOKw1HNYaDmsNHx5S+ZNUblSmiknlCZWpYlKZKiaVqWJSmSreUJkq3jisNRzWGg5rDfYLa/3nsNZwWGs4rDUc1hoOaw2HtYbDWsP/AA2JHiXehXNdAAAAAElFTkSuQmCC'; 
+
+var specifiedElement = document.getElementById('qr-modal');
+
+//I'm using "click" but it works with any event
+document.getElementById('qrContainer').addEventListener('click', function(event) {
+  var isClickInside = specifiedElement.contains(event.target);
+  
+  if (!isClickInside) {
+    document.getElementById('qrContainer').style.display = 'none'
+  }
+});
+
+</script><script async src="https://www.googletagmanager.com/gtag/js?id=UA-50861792-17"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-50861792-17');
+</script></html>
